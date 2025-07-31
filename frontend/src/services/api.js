@@ -1,17 +1,26 @@
 import axios from 'axios'
 
+// Environment variables
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081'
+const APP_NAME = import.meta.env.VITE_APP_NAME || 'Order Management System'
+const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.0.0'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
+    'X-App-Name': APP_NAME,
+    'X-App-Version': APP_VERSION,
   },
 })
 
-// Log API URL for debugging
+// Log environment info for debugging
+console.log('🌍 Environment Info:')
 console.log('API Base URL:', API_BASE_URL)
+console.log('App Name:', APP_NAME)
+console.log('App Version:', APP_VERSION)
+console.log('Node Environment:', import.meta.env.NODE_ENV)
 
 // Simple API without authentication
 
