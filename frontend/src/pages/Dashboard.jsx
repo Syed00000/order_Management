@@ -74,6 +74,8 @@ const Dashboard = () => {
       // Extract data from API response structure
       console.log('📊 Analytics Response:', analyticsResponse)
       console.log('📈 Chart Response:', chartResponse)
+      console.log('📊 Analytics Data:', analyticsResponse.data)
+      console.log('📈 Chart Data:', chartResponse.data)
       setAnalytics(analyticsResponse.data || null)
       setChartData(chartResponse.data || null)
     } catch (error) {
@@ -182,7 +184,11 @@ const Dashboard = () => {
       </div>
 
       {/* Analytics Cards */}
-      {analytics && (
+      {loading ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500">Loading analytics...</p>
+        </div>
+      ) : analytics ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="card">
             <div className="flex items-center">
@@ -234,10 +240,18 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-red-500">No analytics data available</p>
+        </div>
       )}
 
       {/* Charts Section */}
-      {chartData && (
+      {loading ? (
+        <div className="text-center py-8">
+          <p className="text-gray-500">Loading charts...</p>
+        </div>
+      ) : chartData ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Sales</h3>
@@ -284,6 +298,10 @@ const Dashboard = () => {
               <p className="text-gray-500 text-center py-8">No status data available</p>
             )}
           </div>
+        </div>
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-red-500">No chart data available</p>
         </div>
       )}
 

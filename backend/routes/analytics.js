@@ -182,8 +182,8 @@ router.get('/sales-chart', async (req, res) => {
     const salesData = await Order.aggregate([
       {
         $match: {
-          orderDate: { $gte: startDate, $lt: endDate },
           paymentStatus: 'PAID'
+          // Demo mode: show all data regardless of date
         }
       },
       {
