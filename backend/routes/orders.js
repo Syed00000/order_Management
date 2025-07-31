@@ -261,8 +261,8 @@ router.post('/', upload.array('attachments', 5), async (req, res) => {
 
 // @route   PUT /api/orders/:id
 // @desc    Update order
-// @access  Private (Admin/Manager only)
-router.put('/:id', auth, authorize('ADMIN', 'MANAGER'), async (req, res) => {
+// @access  Public (Demo Mode)
+router.put('/:id', async (req, res) => {
   try {
     // Validate input
     const { error, value } = updateOrderSchema.validate(req.body);
@@ -314,10 +314,56 @@ router.put('/:id', auth, authorize('ADMIN', 'MANAGER'), async (req, res) => {
   }
 });
 
+// @route   PUT /api/orders/:id/status
+// @desc    Update order status
+// @access  Public (Demo Mode)
+router.put('/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+    console.log('Status update request:', { orderId: req.params.id, status });
+
+    // Validate status
+    const validStatuses = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status'
+      });
+    }
+
+    // Update status directly without validation
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      { status: status },
+      { new: true, runValidators: false }
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Order status updated successfully',
+      data: { _id: updatedOrder._id, status: updatedOrder.status }
+    });
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+});
+
 // @route   DELETE /api/orders/:id
 // @desc    Delete order
-// @access  Private (Admin only)
-router.delete('/:id', auth, authorize('ADMIN'), async (req, res) => {
+// @access  Public (Demo Mode)
+router.delete('/:id', async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) {
@@ -355,8 +401,8 @@ router.delete('/:id', auth, authorize('ADMIN'), async (req, res) => {
 
 // @route   GET /api/orders/status/:status
 // @desc    Get orders by status
-// @access  Private
-router.get('/status/:status', auth, async (req, res) => {
+// @access  Public (Demo Mode)
+router.get('/status/:status', async (req, res) => {
   try {
     const { status } = req.params;
     const validStatuses = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
