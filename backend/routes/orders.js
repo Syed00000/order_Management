@@ -80,6 +80,8 @@ const updateOrderSchema = Joi.object({
   status: Joi.string().valid('PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED').optional(),
   priority: Joi.string().valid('LOW', 'MEDIUM', 'HIGH', 'URGENT').optional(),
   paymentStatus: Joi.string().valid('PENDING', 'PAID', 'FAILED', 'REFUNDED').optional(),
+  paymentMethod: Joi.string().valid('CREDIT_CARD', 'DEBIT_CARD', 'PAYPAL', 'BANK_TRANSFER', 'CASH_ON_DELIVERY').optional(),
+  totalAmount: Joi.number().min(0).optional(),
   trackingNumber: Joi.string().optional(),
   expectedDeliveryDate: Joi.date().optional(),
   actualDeliveryDate: Joi.date().optional(),
@@ -432,6 +434,129 @@ router.get('/status/:status', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error while fetching orders'
+    });
+  }
+});
+
+// @route   POST /api/orders/demo-data
+// @desc    Create demo data for analytics
+// @access  Public (Demo Mode)
+router.post('/demo-data', async (req, res) => {
+  try {
+    // Create sample orders with proper data
+    const demoOrders = [
+      {
+        orderNumber: 'ORD-2025-001',
+        customerName: 'John Doe',
+        customerEmail: 'john@example.com',
+        customerPhone: '123-456-7890',
+        totalAmount: 299.99,
+        paymentMethod: 'CREDIT_CARD',
+        paymentStatus: 'PAID',
+        status: 'DELIVERED',
+        priority: 'HIGH',
+        orderDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+        items: [{
+          productName: 'Laptop',
+          productId: 'PROD-001',
+          quantity: 1,
+          unitPrice: 299.99,
+          totalPrice: 299.99
+        }],
+        shippingAddress: {
+          street: '123 Main St',
+          city: 'New York',
+          state: 'NY',
+          zipCode: '10001',
+          country: 'USA'
+        }
+      },
+      {
+        orderNumber: 'ORD-2025-002',
+        customerName: 'Jane Smith',
+        customerEmail: 'jane@example.com',
+        customerPhone: '987-654-3210',
+        totalAmount: 149.99,
+        paymentMethod: 'PAYPAL',
+        paymentStatus: 'PAID',
+        status: 'SHIPPED',
+        priority: 'MEDIUM',
+        orderDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+        items: [{
+          productName: 'Headphones',
+          productId: 'PROD-002',
+          quantity: 1,
+          unitPrice: 149.99,
+          totalPrice: 149.99
+        }],
+        shippingAddress: {
+          street: '456 Oak Ave',
+          city: 'Los Angeles',
+          state: 'CA',
+          zipCode: '90210',
+          country: 'USA'
+        }
+      },
+      {
+        orderNumber: 'ORD-2025-003',
+        customerName: 'Bob Johnson',
+        customerEmail: 'bob@example.com',
+        customerPhone: '555-123-4567',
+        totalAmount: 89.99,
+        paymentMethod: 'CREDIT_CARD',
+        paymentStatus: 'PAID',
+        status: 'PROCESSING',
+        priority: 'LOW',
+        orderDate: new Date(), // Today
+        items: [{
+          productName: 'Mouse',
+          productId: 'PROD-003',
+          quantity: 1,
+          unitPrice: 89.99,
+          totalPrice: 89.99
+        }],
+        shippingAddress: {
+          street: '789 Pine St',
+          city: 'Chicago',
+          state: 'IL',
+          zipCode: '60601',
+          country: 'USA'
+        }
+      }
+    ];
+
+    // First create a demo customer
+    const demoCustomer = await User.findOne({ email: 'demo@example.com' }) ||
+      await User.create({
+        name: 'Demo Customer',
+        email: 'demo@example.com',
+        password: 'demo123',
+        role: 'USER'
+      });
+
+    // Add customerId to all orders
+    const ordersWithCustomer = demoOrders.map(order => ({
+      ...order,
+      customerId: demoCustomer._id
+    }));
+
+    // Create orders without validation
+    const createdOrders = await Order.insertMany(ordersWithCustomer, {
+      ordered: false,
+      validateBeforeInsert: false
+    });
+
+    res.json({
+      success: true,
+      message: `Created ${createdOrders.length} demo orders`,
+      data: createdOrders
+    });
+  } catch (error) {
+    console.error('Error creating demo data:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error creating demo data',
+      error: error.message
     });
   }
 });
