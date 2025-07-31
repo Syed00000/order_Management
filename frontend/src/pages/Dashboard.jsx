@@ -40,8 +40,8 @@ const Dashboard = () => {
       setFilteredOrders(orders)
     } else {
       const filtered = orders.filter(order =>
-        order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.id.toLowerCase().includes(searchTerm.toLowerCase())
+        order.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (order._id || order.id)?.toLowerCase().includes(searchTerm.toLowerCase())
       )
       setFilteredOrders(filtered)
     }
@@ -50,10 +50,12 @@ const Dashboard = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true)
-      const data = await orderAPI.getAllOrders()
+      const response = await orderAPI.getAllOrders()
 
-      setOrders(data)
-      setFilteredOrders(data)
+      // Extract orders from API response structure
+      const orders = response.data?.orders || []
+      setOrders(orders)
+      setFilteredOrders(orders)
     } catch (error) {
       console.error('Error fetching orders:', error)
       toast.error('Failed to fetch orders')
@@ -64,12 +66,14 @@ const Dashboard = () => {
 
   const fetchAnalytics = async () => {
     try {
-      const [analyticsData, chartDataResponse] = await Promise.all([
+      const [analyticsResponse, chartResponse] = await Promise.all([
         analyticsAPI.getDashboardAnalytics(),
         analyticsAPI.getSalesChartData()
       ])
-      setAnalytics(analyticsData)
-      setChartData(chartDataResponse)
+
+      // Extract data from API response structure
+      setAnalytics(analyticsResponse.data || null)
+      setChartData(chartResponse.data || null)
     } catch (error) {
       console.error('Error fetching analytics:', error)
       // Don't show error toast for analytics as it's not critical
@@ -106,8 +110,8 @@ const Dashboard = () => {
       await orderAPI.deleteOrder(orderId)
       
       // Remove the order from the local state
-      setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId))
-      setFilteredOrders(prevOrders => prevOrders.filter(order => order.id !== orderId))
+      setOrders(prevOrders => prevOrders.filter(order => (order._id || order.id) !== orderId))
+      setFilteredOrders(prevOrders => prevOrders.filter(order => (order._id || order.id) !== orderId))
       
       toast.dismiss(loadingToast)
       toast.success('Order deleted successfully!')
@@ -349,9 +353,9 @@ const Dashboard = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
+                  <tr key={order._id || order.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      #{order.id.slice(-8)}
+                      #{(order._id || order.id)?.slice(-8)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {order.customerName}
@@ -368,7 +372,7 @@ const Dashboard = () => {
                         className="hover:bg-gray-50 p-1 rounded"
                       >
                         <StatusBadge
-                          key={`${order.id}-${order.status}`}
+                          key={`${order._id || order.id}-${order.status}`}
                           status={order.status || 'PENDING'}
                         />
                       </button>
@@ -376,7 +380,7 @@ const Dashboard = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-3">
                         <Link
-                          to={`/orders/${order.id}`}
+                          to={`/orders/${order._id || order.id}`}
                           className="text-primary-600 hover:text-primary-900 inline-flex items-center space-x-1"
                         >
                           <EyeIcon className="h-4 w-4" />
@@ -390,7 +394,7 @@ const Dashboard = () => {
                           <span>Download</span>
                         </button>
                         <button
-                          onClick={() => handleDelete(order.id, order.customerName)}
+                          onClick={() => handleDelete(order._id || order.id, order.customerName)}
                           className="text-red-600 hover:text-red-900 inline-flex items-center space-x-1"
                         >
                           <TrashIcon className="h-4 w-4" />
