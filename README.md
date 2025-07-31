@@ -1,212 +1,227 @@
-# Order Management System
+# 🚀 Order Management System - Full Stack MERN
 
-A modern, full-stack Order Management System built with React.js frontend and Spring Boot backend, featuring PDF invoice uploads, Firebase storage, and MongoDB Atlas database.
+A complete **MERN Stack** application for managing orders, customers, and analytics with modern web technologies.
 
-## 🚀 Features
+## 📋 **Technology Stack**
 
-- **Create Orders**: Add new orders with customer details, amounts, and PDF invoice uploads
-- **View Orders**: Dashboard with searchable table of all orders
-- **Order Details**: Detailed view of individual orders with download functionality
-- **File Storage**: PDF invoices stored securely in Firebase Storage
-- **Responsive Design**: Mobile-friendly UI built with Tailwind CSS
-- **Real-time Notifications**: Toast notifications for user feedback
+### **Frontend**
+- ⚛️ **React 18** - Modern UI library
+- ⚡ **Vite** - Fast build tool and dev server
+- 🎨 **Tailwind CSS** - Utility-first CSS framework
+- 🛣️ **React Router** - Client-side routing
+- 📊 **Chart.js** - Data visualization
+- 🔔 **React Hot Toast** - Beautiful notifications
+- 📱 **Responsive Design** - Mobile-first approach
 
-## 🛠️ Tech Stack
+### **Backend**
+- 🟢 **Node.js 22.x** - JavaScript runtime
+- 🚀 **Express.js** - Fast web framework
+- 🍃 **MongoDB** - NoSQL database
+- 🔗 **Mongoose** - MongoDB object modeling
+- 🔐 **JWT** - JSON Web Token authentication
+- 🔒 **bcryptjs** - Password hashing
+- 📁 **Multer** - File upload handling
+- ✅ **Joi** - Input validation
+- 🛡️ **Helmet** - Security middleware
 
-### Frontend
-- **React.js** - UI framework
-- **Vite** - Build tool and dev server
-- **Tailwind CSS** - Styling framework
-- **React Router** - Client-side routing
-- **Axios** - HTTP client
-- **React Hot Toast** - Notifications
-- **Heroicons** - Icon library
-- **date-fns** - Date formatting
+### **Database**
+- 🌐 **MongoDB Atlas** - Cloud database
+- 📊 **Aggregation Pipelines** - Advanced analytics
+- 🔍 **Indexing** - Optimized queries
+- 🔄 **Real-time Updates** - Live data sync
 
-### Backend
-- **Spring Boot** - Java framework
-- **Spring Data MongoDB** - Database integration
-- **Firebase Admin SDK** - File storage
-- **Maven** - Dependency management
+---
 
-### Database & Storage
-- **MongoDB Atlas** - Cloud database (free tier)
-- **Firebase Storage** - File storage (free tier)
+## ✨ **Features**
 
-## 📋 Prerequisites
+### **🔐 Authentication & Authorization**
+- User registration and login
+- JWT-based authentication
+- Role-based access control (Admin, Manager, User)
+- Password hashing with bcryptjs
+- Protected routes and API endpoints
 
-- **Java 17** or higher
-- **Node.js 18** or higher
-- **npm** or **yarn**
-- **MongoDB Atlas** account (free)
-- **Firebase** project with Storage enabled
+### **📦 Order Management**
+- Create, read, update, delete orders
+- Order status tracking (Pending → Delivered)
+- Priority levels (Low, Medium, High, Urgent)
+- Customer information management
+- File attachments for orders
+- Order search and filtering
 
-## 🔧 Setup Instructions
+### **📊 Analytics Dashboard**
+- Sales charts and trends
+- Order status distribution
+- Customer insights and analytics
+- Revenue tracking
+- Top customers analysis
+- Real-time metrics
 
-### 1. Clone the Repository
+### **👥 Customer Management**
+- Customer profiles and history
+- Order history per customer
+- Customer lifetime value
+- New vs returning customers
 
+### **📱 Responsive Design**
+- Mobile-first approach
+- Touch-friendly interface
+- Cross-browser compatibility
+- Modern UI/UX design
+
+---
+
+## 🚀 **Quick Start**
+
+### **Prerequisites**
+- Node.js 22.x or higher
+- npm or yarn
+- MongoDB Atlas account (or local MongoDB)
+
+### **1. Clone Repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/Syed00000/order_Management.git
 cd OrderManagement
 ```
 
-### 2. Backend Setup
-
-1. **Navigate to backend directory:**
-   ```bash
-   cd backend
-   ```
-
-2. **Configure application.properties:**
-   The MongoDB connection string is already configured:
-   ```properties
-   spring.data.mongodb.uri=mongodb+srv://Code2cash:cash2code1@cluster0.0eoeraf.mongodb.net/orderdb
-   ```
-
-3. **Firebase Configuration:**
-   The Firebase service account key is already present in the root directory:
-   `ordermanagement-1902c-firebase-adminsdk-fbsvc-137fa7e735.json`
-
-4. **Build and run the backend:**
-   ```bash
-   ./mvnw clean install
-   ./mvnw spring-boot:run
-   ```
-
-   The backend will start on `http://localhost:8080`
-
-### 3. Frontend Setup
-
-1. **Navigate to frontend directory:**
-   ```bash
-   cd frontend
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Start the development server:**
-   ```bash
-   npm run dev
-   ```
-
-   The frontend will start on `http://localhost:3000`
-
-## 🌐 API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/orders` | Create a new order with file upload |
-| GET | `/orders` | Get all orders |
-| GET | `/orders/{id}` | Get single order by ID |
-| GET | `/orders/search` | Search orders by customer name or amount range |
-| DELETE | `/orders/{id}` | Delete an order |
-| GET | `/health` | Health check endpoint |
-
-## 📱 Frontend Pages
-
-1. **Dashboard (/)** - View all orders in a searchable table
-2. **Create Order (/create)** - Form to create new orders with PDF upload
-3. **Order Details (/orders/:id)** - Detailed view of individual orders
-
-## 🔒 Environment Configuration
-
-### Backend (application.properties)
-```properties
-# Server Configuration
-server.port=8080
-
-# MongoDB Configuration
-spring.data.mongodb.uri=mongodb+srv://Code2cash:cash2code1@cluster0.0eoeraf.mongodb.net/orderdb
-
-# File Upload Configuration
-spring.servlet.multipart.max-file-size=10MB
-spring.servlet.multipart.max-request-size=10MB
-
-# Firebase Configuration
-firebase.service-account-key=../ordermanagement-1902c-firebase-adminsdk-fbsvc-137fa7e735.json
-firebase.storage-bucket=ordermanagement-1902c.appspot.com
-
-# CORS Configuration
-cors.allowed-origins=http://localhost:3000,http://localhost:5173
+### **2. Backend Setup**
+```bash
+cd backend
+npm install
+npm run dev
+# Server runs on http://localhost:8080
 ```
 
-## 🧪 Testing the Application
-
-1. **Start both backend and frontend servers**
-2. **Open browser to** `http://localhost:3000`
-3. **Test the flow:**
-   - Create a new order with a PDF file
-   - View the order in the dashboard
-   - Click on order details to see full information
-   - Download the invoice PDF
-
-## 📁 Project Structure
-
-```
-OrderManagement/
-├── backend/                          # Spring Boot backend
-│   ├── src/main/java/com/ordermanagement/
-│   │   ├── config/                   # Configuration classes
-│   │   ├── controller/               # REST controllers
-│   │   ├── model/                    # Entity classes
-│   │   ├── repository/               # Data repositories
-│   │   ├── service/                  # Business logic
-│   │   └── OrderManagementApplication.java
-│   ├── src/main/resources/
-│   │   └── application.properties
-│   └── pom.xml
-├── frontend/                         # React.js frontend
-│   ├── src/
-│   │   ├── components/               # Reusable components
-│   │   ├── pages/                    # Page components
-│   │   ├── services/                 # API services
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── package.json
-│   └── vite.config.js
-├── ordermanagement-1902c-firebase-adminsdk-fbsvc-137fa7e735.json
-└── README.md
+### **3. Frontend Setup**
+```bash
+cd frontend
+npm install
+npm run dev
+# App runs on http://localhost:3000
 ```
 
-## 🚀 Deployment Options
+### **4. Environment Variables**
 
-### Frontend Deployment (Free)
-- **Vercel** - Connect GitHub repo for automatic deployments
-- **Netlify** - Drag and drop build folder or connect GitHub
+**Backend (.env):**
+```env
+MONGODB_URI=mongodb+srv://Code2cash:cash2code1@cluster0.0eoeraf.mongodb.net/orderManagement
+JWT_SECRET=your-super-secret-jwt-key
+NODE_ENV=development
+PORT=8080
+```
 
-### Backend Deployment (Free)
-- **Render** - Connect GitHub repo, supports Spring Boot
-- **Railway** - Easy deployment with GitHub integration
+**Frontend (.env.production):**
+```env
+VITE_API_URL=http://localhost:8080
+VITE_APP_NAME=Order Management System
+VITE_APP_VERSION=1.0.0
+```
 
-## 🔧 Troubleshooting
+---
 
-### Common Issues
+## 🐳 **Docker Deployment**
 
-1. **CORS Errors**: Ensure frontend URL is added to `cors.allowed-origins` in backend
-2. **File Upload Issues**: Check Firebase Storage rules and service account permissions
-3. **MongoDB Connection**: Verify connection string and network access in MongoDB Atlas
-4. **Port Conflicts**: Change ports in configuration if 8080 or 3000 are in use
+### **Development**
+```bash
+docker-compose -f docker-compose.dev.yml up --build
+```
 
-### Logs and Debugging
+### **Production**
+```bash
+docker-compose up --build
+```
 
-- **Backend logs**: Check console output when running Spring Boot
-- **Frontend logs**: Open browser developer tools console
-- **Network requests**: Use browser Network tab to debug API calls
+---
 
-## 📄 License
+## 🌐 **API Endpoints**
 
-This project is open source and available under the [MIT License](LICENSE).
+### **Authentication**
+- `POST /api/auth/register` - Register user
+- `POST /api/auth/login` - Login user
+- `GET /api/auth/me` - Get profile
+- `PUT /api/auth/profile` - Update profile
 
-## 🤝 Contributing
+### **Orders**
+- `GET /api/orders` - Get all orders
+- `POST /api/orders` - Create order
+- `GET /api/orders/:id` - Get order by ID
+- `PUT /api/orders/:id` - Update order
+- `DELETE /api/orders/:id` - Delete order
+
+### **Analytics**
+- `GET /api/analytics/dashboard` - Dashboard data
+- `GET /api/analytics/sales-chart` - Sales chart
+- `GET /api/analytics/order-trends` - Order trends
+
+### **Health**
+- `GET /health` - Basic health check
+- `GET /health/detailed` - Detailed system info
+
+---
+
+## 🚀 **Production Deployment**
+
+### **Frontend (Vercel)**
+1. Build the frontend: `npm run build`
+2. Upload `dist` folder to Vercel
+3. Set environment variables
+4. Deploy instantly
+
+### **Backend (Railway)**
+1. Connect GitHub repository
+2. Set root directory to `backend`
+3. Configure environment variables
+4. Deploy automatically
+
+### **Database (MongoDB Atlas)**
+- Already configured and connected
+- Cloud-hosted and scalable
+- Automatic backups and monitoring
+
+---
+
+## 🔒 **Security Features**
+
+- **Helmet** - Security headers
+- **CORS** - Cross-origin protection
+- **Rate Limiting** - Prevent abuse
+- **JWT Authentication** - Secure tokens
+- **Password Hashing** - bcryptjs encryption
+- **Input Validation** - Joi validation
+- **File Upload Security** - Type and size limits
+
+---
+
+## 📊 **Performance**
+
+- **Vite** - Fast build and HMR
+- **MongoDB Indexing** - Optimized queries
+- **Compression** - Reduced payload size
+- **Caching** - Improved response times
+- **Pagination** - Efficient data loading
+
+---
+
+## 🤝 **Contributing**
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Submit a pull request
+4. Add tests if applicable
+5. Submit a pull request
 
-## 📞 Support
+---
 
-For issues and questions, please create an issue in the GitHub repository.
+## 📄 **License**
+
+This project is licensed under the MIT License.
+
+---
+
+## 👨‍💻 **Author**
+
+**Syed Imran Hassan**
+- GitHub: [@Syed00000](https://github.com/Syed00000)
+- Repository: [order_Management](https://github.com/Syed00000/order_Management)
+
+**Built with ❤️ using the MERN Stack**

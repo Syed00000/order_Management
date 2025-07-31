@@ -4,9 +4,9 @@ services:
   # Backend Service - Node.js Express (MERN Stack)
   backend:
     build:
-      context: ./backend-nodejs
+      context: ./backend
       dockerfile: Dockerfile
-    container_name: order-management-backend-nodejs
+    container_name: order-management-backend-mern
     ports:
       - "8080:8080"
     environment:

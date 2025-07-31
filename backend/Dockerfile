@@ -1,12 +1,27 @@
-# Use official Java 17 image
-FROM eclipse-temurin:17-jdk
+# Node.js Backend Dockerfile for MERN Stack
+FROM node:22-alpine
 
-# Set working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy the jar file into the container
-ARG JAR_FILE=target/*.jar
-COPY ${JAR_FILE} app.jar
+# Copy package files
+COPY package*.json ./
 
-# Run the jar file
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy source code
+COPY . .
+
+# Create uploads directory
+RUN mkdir -p uploads/orders
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:8080/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+
+# Start the application
+CMD ["npm", "start"]

@@ -86,7 +86,7 @@ npx serve -s . -l 3000
 1. **Go to [railway.app](https://railway.app)**
 2. **New Project → Deploy from GitHub**
 3. **Select repository**
-4. **Set Root Directory**: `backend-nodejs`
+4. **Set Root Directory**: `backend`
 5. **Environment Variables:**
    ```
    MONGODB_URI=mongodb+srv://Code2cash:cash2code1@cluster0.0eoeraf.mongodb.net/orderManagement
