@@ -72,6 +72,8 @@ const Dashboard = () => {
       ])
 
       // Extract data from API response structure
+      console.log('📊 Analytics Response:', analyticsResponse)
+      console.log('📈 Chart Response:', chartResponse)
       setAnalytics(analyticsResponse.data || null)
       setChartData(chartResponse.data || null)
     } catch (error) {
@@ -189,7 +191,7 @@ const Dashboard = () => {
               </div>
               <div className="ml-3 sm:ml-4">
                 <p className="text-xs sm:text-sm font-medium text-gray-500">Total Orders</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">{analytics.totalOrders}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{analytics.overview?.totalOrders || 0}</p>
               </div>
             </div>
           </div>
@@ -201,7 +203,7 @@ const Dashboard = () => {
               </div>
               <div className="ml-3 sm:ml-4">
                 <p className="text-xs sm:text-sm font-medium text-gray-500">Total Revenue</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">${analytics.totalRevenue?.toFixed(2)}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">${analytics.overview?.totalRevenue?.toFixed(2) || '0.00'}</p>
               </div>
             </div>
           </div>
@@ -213,7 +215,7 @@ const Dashboard = () => {
               </div>
               <div className="ml-3 sm:ml-4">
                 <p className="text-xs sm:text-sm font-medium text-gray-500">Avg Order Value</p>
-                <p className="text-xl sm:text-2xl font-bold text-gray-900">${analytics.averageOrderValue?.toFixed(2)}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">${analytics.overview?.avgOrderValue?.toFixed(2) || '0.00'}</p>
               </div>
             </div>
           </div>
@@ -224,9 +226,9 @@ const Dashboard = () => {
                 <ChartBarIcon className="h-6 w-6 sm:h-8 sm:w-8 text-purple-600" />
               </div>
               <div className="ml-3 sm:ml-4">
-                <p className="text-xs sm:text-sm font-medium text-gray-500">Completed Orders</p>
+                <p className="text-xs sm:text-sm font-medium text-gray-500">Delivered Orders</p>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                  {analytics.statusDistribution?.COMPLETED?.count || 0}
+                  {analytics.statusDistribution?.DELIVERED?.count || 0}
                 </p>
               </div>
             </div>
@@ -239,13 +241,13 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Sales</h3>
-            {chartData.monthlySales && chartData.monthlySales.length > 0 ? (
-              <SalesChart 
+            {chartData.chartData && chartData.chartData.length > 0 ? (
+              <SalesChart
                 data={{
-                  labels: chartData.monthlySales.map(item => item.month),
+                  labels: chartData.chartData.map(item => item.date),
                   datasets: [{
                     label: 'Sales ($)',
-                    data: chartData.monthlySales.map(item => item.sales),
+                    data: chartData.chartData.map(item => item.sales),
                     backgroundColor: 'rgba(59, 130, 246, 0.5)',
                     borderColor: 'rgb(59, 130, 246)',
                     borderWidth: 1,
@@ -260,15 +262,19 @@ const Dashboard = () => {
 
           <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Status Distribution</h3>
-            {chartData.statusDistribution ? (
-              <SalesChart 
+            {analytics.statusDistribution ? (
+              <SalesChart
                 data={{
-                  labels: Object.keys(chartData.statusDistribution).map(status => 
-                    chartData.statusDistribution[status].displayName
-                  ),
+                  labels: Object.keys(analytics.statusDistribution),
                   datasets: [{
-                    data: Object.values(chartData.statusDistribution).map(status => status.count),
-                    backgroundColor: Object.values(chartData.statusDistribution).map(status => status.color),
+                    data: Object.values(analytics.statusDistribution).map(status => status.count),
+                    backgroundColor: [
+                      'rgba(255, 99, 132, 0.8)',
+                      'rgba(54, 162, 235, 0.8)',
+                      'rgba(255, 205, 86, 0.8)',
+                      'rgba(75, 192, 192, 0.8)',
+                      'rgba(153, 102, 255, 0.8)',
+                    ],
                     borderWidth: 1,
                   }]
                 }}
