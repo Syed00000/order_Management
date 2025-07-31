@@ -141,8 +141,8 @@ router.get('/dashboard', async (req, res) => {
 
 // @route   GET /api/analytics/sales-chart
 // @desc    Get sales chart data
-// @access  Private (Admin/Manager)
-router.get('/sales-chart', auth, authorize('ADMIN', 'MANAGER'), async (req, res) => {
+// @access  Public (Demo Mode)
+router.get('/sales-chart', async (req, res) => {
   try {
     const { period = 'month', year = new Date().getFullYear() } = req.query;
 

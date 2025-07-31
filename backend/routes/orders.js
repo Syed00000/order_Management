@@ -110,10 +110,7 @@ router.get('/', async (req, res) => {
     if (customerEmail) filter.customerEmail = new RegExp(customerEmail, 'i');
     if (orderNumber) filter.orderNumber = new RegExp(orderNumber, 'i');
 
-    // If user is not admin/manager, only show their orders
-    if (req.user.role === 'USER') {
-      filter.customerEmail = req.user.email;
-    }
+    // Demo mode - show all orders (no user filtering)
 
     // Build sort object
     const sort = {};
@@ -170,13 +167,7 @@ router.get('/:id', async (req, res) => {
       });
     }
 
-    // Check if user can access this order
-    if (req.user.role === 'USER' && order.customerEmail !== req.user.email) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied'
-      });
-    }
+    // Demo mode - allow access to all orders
 
     res.json({
       success: true,
@@ -243,7 +234,7 @@ router.post('/', upload.array('attachments', 5), async (req, res) => {
       attachments,
       statusHistory: [{
         status: 'PENDING',
-        changedBy: req.user.userId,
+        changedBy: null, // Demo mode - no user tracking
         notes: 'Order created'
       }]
     });
@@ -295,7 +286,7 @@ router.put('/:id', auth, authorize('ADMIN', 'MANAGER'), async (req, res) => {
     if (value.status && value.status !== order.status) {
       order.statusHistory.push({
         status: value.status,
-        changedBy: req.user.userId,
+        changedBy: null, // Demo mode - no user tracking
         notes: `Status changed from ${order.status} to ${value.status}`
       });
     }
@@ -378,9 +369,7 @@ router.get('/status/:status', auth, async (req, res) => {
     }
 
     const filter = { status };
-    if (req.user.role === 'USER') {
-      filter.customerEmail = req.user.email;
-    }
+    // Demo mode - show all orders regardless of user
 
     const orders = await Order.find(filter)
       .populate('customerId', 'name email phone')
