@@ -17,10 +17,11 @@ const StatusUpdateModal = ({ isOpen, onClose, order, onUpdate }) => {
 
   const statusOptions = [
     { value: 'PENDING', label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
-    { value: 'PROCESSING', label: 'Processing', color: 'bg-blue-100 text-blue-800' },
-    { value: 'COMPLETED', label: 'Completed', color: 'bg-green-100 text-green-800' },
+    { value: 'CONFIRMED', label: 'Confirmed', color: 'bg-blue-100 text-blue-800' },
+    { value: 'PROCESSING', label: 'Processing', color: 'bg-indigo-100 text-indigo-800' },
+    { value: 'SHIPPED', label: 'Shipped', color: 'bg-purple-100 text-purple-800' },
+    { value: 'DELIVERED', label: 'Delivered', color: 'bg-green-100 text-green-800' },
     { value: 'CANCELLED', label: 'Cancelled', color: 'bg-red-100 text-red-800' },
-    { value: 'DECLINED', label: 'Declined', color: 'bg-red-100 text-red-800' },
   ]
 
   const handleSubmit = async (e) => {
@@ -29,7 +30,7 @@ const StatusUpdateModal = ({ isOpen, onClose, order, onUpdate }) => {
 
     try {
 
-      await orderAPI.updateOrderStatus(order.id, selectedStatus)
+      await orderAPI.updateOrderStatus(order._id || order.id, selectedStatus)
       toast.success('Order status updated successfully!')
       onUpdate()
       onClose()
@@ -58,7 +59,7 @@ const StatusUpdateModal = ({ isOpen, onClose, order, onUpdate }) => {
 
         <div className="mb-4">
           <p className="text-sm text-gray-600">
-            Order ID: <span className="font-medium">{order?.id}</span>
+            Order ID: <span className="font-medium">#{(order?._id || order?.id)?.slice(-8)}</span>
           </p>
           <p className="text-sm text-gray-600">
             Customer: <span className="font-medium">{order?.customerName}</span>
