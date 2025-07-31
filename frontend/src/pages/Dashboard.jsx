@@ -256,46 +256,58 @@ const Dashboard = () => {
           <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Sales</h3>
             {chartData.chartData && chartData.chartData.length > 0 ? (
-              <SalesChart
-                data={{
-                  labels: chartData.chartData.map(item => item.date),
-                  datasets: [{
-                    label: 'Sales ($)',
-                    data: chartData.chartData.map(item => item.sales),
-                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                    borderColor: 'rgb(59, 130, 246)',
-                    borderWidth: 1,
-                  }]
-                }}
-                type="bar"
-              />
+              <>
+                {console.log('📊 Rendering Sales Chart with data:', chartData.chartData)}
+                <SalesChart
+                  data={{
+                    labels: chartData.chartData.map(item => item.date),
+                    datasets: [{
+                      label: 'Sales ($)',
+                      data: chartData.chartData.map(item => item.sales),
+                      backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                      borderColor: 'rgb(59, 130, 246)',
+                      borderWidth: 1,
+                    }]
+                  }}
+                  type="bar"
+                />
+              </>
             ) : (
-              <p className="text-gray-500 text-center py-8">No sales data available</p>
+              <>
+                {console.log('❌ No sales chart data:', chartData)}
+                <p className="text-gray-500 text-center py-8">No sales data available</p>
+              </>
             )}
           </div>
 
           <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Status Distribution</h3>
             {analytics.statusDistribution ? (
-              <SalesChart
-                data={{
-                  labels: Object.keys(analytics.statusDistribution),
-                  datasets: [{
-                    data: Object.values(analytics.statusDistribution).map(status => status.count),
-                    backgroundColor: [
-                      'rgba(255, 99, 132, 0.8)',
-                      'rgba(54, 162, 235, 0.8)',
-                      'rgba(255, 205, 86, 0.8)',
-                      'rgba(75, 192, 192, 0.8)',
-                      'rgba(153, 102, 255, 0.8)',
-                    ],
-                    borderWidth: 1,
-                  }]
-                }}
-                type="doughnut"
-              />
+              <>
+                {console.log('📊 Rendering Status Chart with data:', analytics.statusDistribution)}
+                <SalesChart
+                  data={{
+                    labels: Object.keys(analytics.statusDistribution),
+                    datasets: [{
+                      data: Object.values(analytics.statusDistribution).map(status => status.count),
+                      backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 205, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                      ],
+                      borderWidth: 1,
+                    }]
+                  }}
+                  type="doughnut"
+                />
+              </>
             ) : (
-              <p className="text-gray-500 text-center py-8">No status data available</p>
+              <>
+                {console.log('❌ No status distribution data:', analytics)}
+                <p className="text-gray-500 text-center py-8">No status data available</p>
+              </>
             )}
           </div>
         </div>

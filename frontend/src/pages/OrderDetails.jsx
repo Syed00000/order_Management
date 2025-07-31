@@ -70,7 +70,7 @@ const OrderDetails = () => {
     const loadingToast = toast.loading('Deleting order...')
     
     try {
-      await orderAPI.deleteOrder(order.id)
+      await orderAPI.deleteOrder(order?._id || order?.id)
       
       toast.dismiss(loadingToast)
       toast.success('Order deleted successfully!')
@@ -146,7 +146,7 @@ const OrderDetails = () => {
           </button>
           <div>
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Order Details</h1>
-            <p className="text-sm sm:text-base text-gray-600">Order #{order.id.slice(-8)}</p>
+            <p className="text-sm sm:text-base text-gray-600">Order #{order && (order._id || order.id) ? (order._id || order.id).slice(-8) : 'N/A'}</p>
           </div>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">

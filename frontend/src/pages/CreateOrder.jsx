@@ -2,11 +2,13 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { orderAPI } from '../services/api'
-import { 
-  DocumentArrowUpIcon, 
-  UserIcon, 
+import {
+  DocumentArrowUpIcon,
+  UserIcon,
   CurrencyDollarIcon,
-  CheckCircleIcon 
+  CheckCircleIcon,
+  EnvelopeIcon,
+  PhoneIcon
 } from '@heroicons/react/24/outline'
 
 const CreateOrder = () => {
@@ -14,8 +16,25 @@ const CreateOrder = () => {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     customerName: '',
+    customerEmail: '',
+    customerPhone: '',
     orderAmount: '',
-    invoiceFile: null
+    invoiceFile: null,
+    shippingAddress: {
+      street: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: 'USA'
+    },
+    items: [{
+      productName: '',
+      productId: '',
+      quantity: 1,
+      unitPrice: 0
+    }],
+    priority: 'MEDIUM',
+    notes: ''
   })
   const [dragActive, setDragActive] = useState(false)
 
@@ -97,7 +116,17 @@ const CreateOrder = () => {
     try {
       const orderData = {
         customerName: formData.customerName.trim(),
-        orderAmount: parseFloat(formData.orderAmount),
+        customerEmail: formData.customerEmail.trim(),
+        customerPhone: formData.customerPhone.trim(),
+        items: formData.items.map(item => ({
+          productName: item.productName.trim(),
+          productId: item.productId.trim() || `PROD-${Date.now()}`,
+          quantity: parseInt(item.quantity),
+          unitPrice: parseFloat(item.unitPrice)
+        })),
+        shippingAddress: formData.shippingAddress,
+        priority: formData.priority,
+        notes: formData.notes.trim(),
         invoiceFile: formData.invoiceFile
       }
 
@@ -156,6 +185,46 @@ const CreateOrder = () => {
                 value={formData.customerName}
                 onChange={handleInputChange}
                 placeholder="Enter customer name"
+                className="input-field pl-9 sm:pl-10 text-sm sm:text-base"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Customer Email */}
+          <div>
+            <label htmlFor="customerEmail" className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+              Customer Email *
+            </label>
+            <div className="relative">
+              <EnvelopeIcon className="h-4 w-4 sm:h-5 sm:w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="email"
+                id="customerEmail"
+                name="customerEmail"
+                value={formData.customerEmail}
+                onChange={handleInputChange}
+                placeholder="Enter customer email"
+                className="input-field pl-9 sm:pl-10 text-sm sm:text-base"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Customer Phone */}
+          <div>
+            <label htmlFor="customerPhone" className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
+              Customer Phone *
+            </label>
+            <div className="relative">
+              <PhoneIcon className="h-4 w-4 sm:h-5 sm:w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="tel"
+                id="customerPhone"
+                name="customerPhone"
+                value={formData.customerPhone}
+                onChange={handleInputChange}
+                placeholder="Enter customer phone"
                 className="input-field pl-9 sm:pl-10 text-sm sm:text-base"
                 required
               />
