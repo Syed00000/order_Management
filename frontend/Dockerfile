@@ -1,7 +1,7 @@
 # Frontend Dockerfile - Multi-stage build for React/Vite
 
 # Stage 1: Build the application
-FROM node:18-alpine AS build
+FROM node:22-alpine AS build
 
 # Set working directory
 WORKDIR /app
