@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-// Environment variables
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081'
+// MERN Stack Environment variables
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 const APP_NAME = import.meta.env.VITE_APP_NAME || 'Order Management System'
 const APP_VERSION = import.meta.env.VITE_APP_VERSION || '1.0.0'
 
@@ -15,9 +15,11 @@ const api = axios.create({
   },
 })
 
-// Log environment info for debugging
-console.log('🌍 Environment Info:')
+// Log MERN Stack environment info for debugging
+console.log('🌍 MERN Stack Environment Info:')
 console.log('API Base URL:', API_BASE_URL)
+console.log('Backend:', 'Node.js Express Server')
+console.log('Database:', 'MongoDB Atlas')
 console.log('App Name:', APP_NAME)
 console.log('App Version:', APP_VERSION)
 console.log('Node Environment:', import.meta.env.NODE_ENV)

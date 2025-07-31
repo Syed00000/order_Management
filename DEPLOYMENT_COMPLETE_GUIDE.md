@@ -1,4 +1,4 @@
-# 🚀 Complete Deployment Guide - All Options
+# 🚀 Complete MERN Stack Deployment Guide - All Options
 
 ## ❌ Issues Fixed:
 - ✅ Vercel build error 126
@@ -80,19 +80,20 @@ npx serve -s . -l 3000
 
 ---
 
-## 🔧 **Backend Deployment (Railway)**
+## 🔧 **Backend Deployment (Railway) - MERN Stack**
 
 ### Steps:
 1. **Go to [railway.app](https://railway.app)**
 2. **New Project → Deploy from GitHub**
 3. **Select repository**
-4. **Set Root Directory**: `backend`
+4. **Set Root Directory**: `backend-nodejs`
 5. **Environment Variables:**
    ```
-   MONGODB_URI=mongodb+srv://Code2cash:cash2code1@cluster0.0eoeraf.mongodb.net/
+   MONGODB_URI=mongodb+srv://Code2cash:cash2code1@cluster0.0eoeraf.mongodb.net/orderManagement
    MONGODB_DATABASE=orderManagement
    PORT=8080
-   SPRING_PROFILES_ACTIVE=production
+   NODE_ENV=production
+   JWT_SECRET=your-super-secret-jwt-key-change-in-production
    CORS_ALLOWED_ORIGINS=https://your-frontend.vercel.app
    ```
 6. **Deploy!**
