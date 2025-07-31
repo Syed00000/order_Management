@@ -7,8 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class OrderManagementApplication {
 
     public static void main(String[] args) {
-        // Set default profile to production if not specified
-        System.setProperty("spring.profiles.default", "production");
+        // Set default profile to development for local run
+        System.setProperty("spring.profiles.default", "development");
         SpringApplication.run(OrderManagementApplication.class, args);
     }
 
