@@ -123,12 +123,18 @@ const SimpleLandingPage = () => {
             <p className="mx-auto mt-4 sm:mt-6 max-w-xl text-base sm:text-lg leading-6 sm:leading-8 text-blue-200 px-2 sm:px-0">
               Start managing your orders efficiently today. No setup required, just click and begin.
             </p>
-            <div className="mt-8 sm:mt-10 flex items-center justify-center px-4 sm:px-0">
+            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-x-6 px-4 sm:px-0">
               <Link
-                to="/dashboard"
+                to="/login"
                 className="w-full sm:w-auto rounded-md bg-white px-6 py-3 text-base sm:text-lg font-semibold text-blue-600 shadow-sm hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition-colors duration-200 text-center"
               >
-                Get Started Now
+                Login Now
+              </Link>
+              <Link
+                to="/register"
+                className="w-full sm:w-auto rounded-md bg-blue-600 px-6 py-3 text-base sm:text-lg font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-colors duration-200 text-center"
+              >
+                Sign Up Free
               </Link>
             </div>
           </div>

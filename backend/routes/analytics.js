@@ -8,8 +8,8 @@ const router = express.Router();
 
 // @route   GET /api/analytics/dashboard
 // @desc    Get dashboard analytics
-// @access  Private (Admin/Manager)
-router.get('/dashboard', auth, authorize('ADMIN', 'MANAGER'), async (req, res) => {
+// @access  Public
+router.get('/dashboard', async (req, res) => {
   try {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);

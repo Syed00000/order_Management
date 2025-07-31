@@ -89,8 +89,8 @@ const updateOrderSchema = Joi.object({
 
 // @route   GET /api/orders
 // @desc    Get all orders with pagination and filtering
-// @access  Private
-router.get('/', auth, async (req, res) => {
+// @access  Public
+router.get('/', async (req, res) => {
   try {
     const {
       page = 1,
@@ -155,8 +155,8 @@ router.get('/', auth, async (req, res) => {
 
 // @route   GET /api/orders/:id
 // @desc    Get single order by ID
-// @access  Private
-router.get('/:id', auth, async (req, res) => {
+// @access  Public
+router.get('/:id', async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate('customerId', 'name email phone address')
@@ -194,8 +194,8 @@ router.get('/:id', auth, async (req, res) => {
 
 // @route   POST /api/orders
 // @desc    Create new order
-// @access  Private
-router.post('/', auth, upload.array('attachments', 5), async (req, res) => {
+// @access  Public
+router.post('/', upload.array('attachments', 5), async (req, res) => {
   try {
     // Validate input
     const { error, value } = createOrderSchema.validate(req.body);

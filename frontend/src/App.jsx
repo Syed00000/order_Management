@@ -4,6 +4,8 @@ import { Toaster } from 'react-hot-toast'
 import ErrorBoundary from './components/ErrorBoundary'
 import Navbar from './components/Navbar'
 import LandingPage from './pages/SimpleLandingPage'
+import Login from './pages/Login'
+import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import CreateOrder from './pages/CreateOrder'
 import OrderDetails from './pages/OrderDetails'
@@ -16,6 +18,10 @@ function App() {
           <Routes>
             {/* Landing Page - No Navbar */}
             <Route path="/" element={<LandingPage />} />
+
+            {/* Authentication Routes - No Navbar */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
             {/* Dashboard Routes - With Navbar */}
             <Route path="/dashboard" element={
