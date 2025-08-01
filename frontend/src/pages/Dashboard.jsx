@@ -184,6 +184,12 @@ const Dashboard = () => {
       </div>
 
       {/* Analytics Cards */}
+      <div className="mb-4 p-4 bg-yellow-100 rounded">
+        <p className="text-sm">Debug: Analytics = {analytics ? 'EXISTS' : 'NULL'}</p>
+        <p className="text-sm">Debug: Loading = {loading ? 'TRUE' : 'FALSE'}</p>
+        {analytics && <p className="text-sm">Total Orders: {analytics.overview?.totalOrders}</p>}
+      </div>
+
       {loading ? (
         <div className="text-center py-8">
           <p className="text-gray-500">Loading analytics...</p>
@@ -349,6 +355,13 @@ const Dashboard = () => {
           </button>
         </div>
 
+        <div className="mb-4 p-4 bg-blue-100 rounded">
+          <p className="text-sm">Debug: Orders Count = {orders.length}</p>
+          <p className="text-sm">Debug: Filtered Orders = {filteredOrders.length}</p>
+          <p className="text-sm">Debug: Search Term = "{searchTerm}"</p>
+          {orders.length > 0 && <p className="text-sm">First Order ID: {orders[0]._id || orders[0].id}</p>}
+        </div>
+
         {filteredOrders.length === 0 ? (
           <div className="text-center py-12">
             <DocumentArrowDownIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -397,7 +410,7 @@ const Dashboard = () => {
                       {order.customerName}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatAmount(order.orderAmount)}
+                      {formatAmount(order.totalAmount || order.orderAmount || 0)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(order.orderDate)}

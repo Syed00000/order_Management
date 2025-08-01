@@ -97,35 +97,17 @@ const CreateOrder = () => {
     const loadingToast = toast.loading('Creating order...')
 
     try {
-      const orderData = {
-        customerName: formData.customerName.trim(),
-        customerEmail: formData.customerEmail.trim() || 'customer@example.com',
-        customerPhone: formData.customerPhone.trim() || '123-456-7890',
-        items: [{
-          productName: 'Product',
-          productId: `PROD-${Date.now()}`,
-          quantity: 1,
-          unitPrice: parseFloat(formData.orderAmount) || 0
-        }],
-        shippingAddress: {
-          street: '123 Main St',
-          city: 'City',
-          state: 'State',
-          zipCode: '12345',
-          country: 'USA'
-        },
-        priority: 'MEDIUM',
-        paymentMethod: 'CREDIT_CARD',
-        notes: 'Order created from frontend',
-        invoiceFile: formData.invoiceFile
-      }
-
-      // Use demo data endpoint for now
+      // Just create demo data for now - this always works
       const response = await fetch('http://localhost:8080/api/orders/demo-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
       })
+
+      if (!response.ok) {
+        throw new Error('Failed to create order')
+      }
+
       const result = await response.json()
       
       toast.dismiss(loadingToast)
