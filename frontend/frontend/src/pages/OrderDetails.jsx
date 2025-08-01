@@ -14,7 +14,6 @@ import {
 } from '@heroicons/react/24/outline'
 import LoadingSpinner from '../components/LoadingSpinner'
 import StatusBadge from '../components/StatusBadge'
-import StatusUpdateModal from '../components/StatusUpdateModal'
 
 const OrderDetails = () => {
   const { id } = useParams()
@@ -22,7 +21,6 @@ const OrderDetails = () => {
   const [order, setOrder] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
-  const [showStatusModal, setShowStatusModal] = useState(false)
 
   useEffect(() => {
     fetchOrderDetails()
@@ -32,26 +30,11 @@ const OrderDetails = () => {
     try {
       setLoading(true)
       setError(null)
+      const data = await orderAPI.getOrderById(id)
 
-      const response = await fetch(`http://localhost:8080/api/orders/${id}`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-
-      if (data.success && data.data && data.data.order) {
-        setOrder(data.data.order)
-      } else {
-        setError('Order not found')
-        toast.error('Order not found')
-      }
+      setOrder(data)
     } catch (error) {
+      console.error('Error fetching order details:', error)
       setError('Order not found or failed to load')
       toast.error('Failed to load order details')
     } finally {
@@ -87,7 +70,7 @@ const OrderDetails = () => {
     const loadingToast = toast.loading('Deleting order...')
     
     try {
-      await orderAPI.deleteOrder(order?._id || order?.id)
+      await orderAPI.deleteOrder(order.id)
       
       toast.dismiss(loadingToast)
       toast.success('Order deleted successfully!')
@@ -104,15 +87,6 @@ const OrderDetails = () => {
         toast.error('Failed to delete order. Please try again.')
       }
     }
-  }
-
-  const handleStatusUpdate = () => {
-    setShowStatusModal(true)
-  }
-
-  const handleStatusUpdateComplete = () => {
-    fetchOrderDetails() // Refresh order data
-    setShowStatusModal(false)
   }
 
   const formatDate = (dateString) => {
@@ -172,7 +146,7 @@ const OrderDetails = () => {
           </button>
           <div>
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">Order Details</h1>
-            <p className="text-sm sm:text-base text-gray-600">Order #{order && (order._id || order.id) ? (order._id || order.id).slice(-8) : 'N/A'}</p>
+            <p className="text-sm sm:text-base text-gray-600">Order #{order.id.slice(-8)}</p>
           </div>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
@@ -208,27 +182,11 @@ const OrderDetails = () => {
             </div>
 
             <div className="flex items-center space-x-3">
-              <UserIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
-              <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-gray-500">Customer Email</p>
-                <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{order.customerEmail || 'Not provided'}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
-              <UserIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
-              <div className="min-w-0 flex-1">
-                <p className="text-xs sm:text-sm text-gray-500">Customer Phone</p>
-                <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{order.customerPhone || 'Not provided'}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-3">
               <CurrencyDollarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 flex-shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm text-gray-500">Order Amount</p>
                 <p className="font-medium text-gray-900 text-base sm:text-lg">
-                  {formatAmount(order.totalAmount || order.orderAmount || 0)}
+                  {formatAmount(order.orderAmount)}
                 </p>
               </div>
             </div>
@@ -245,13 +203,7 @@ const OrderDetails = () => {
 
             <div>
               <h3 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Status</h3>
-              <button
-                onClick={handleStatusUpdate}
-                className="hover:bg-gray-50 p-1 rounded transition-colors"
-                title="Click to update status"
-              >
-                <StatusBadge status={order.status || 'PENDING'} />
-              </button>
+              <StatusBadge status={order.status || 'PENDING'} />
             </div>
           </div>
         </div>
@@ -295,13 +247,7 @@ const OrderDetails = () => {
             </div>
             <div>
               <h3 className="font-medium text-gray-900 mb-2 text-sm sm:text-base">Status</h3>
-              <button
-                onClick={handleStatusUpdate}
-                className="hover:bg-gray-50 p-1 rounded transition-colors"
-                title="Click to update status"
-              >
-                <StatusBadge status={order.status || 'PENDING'} />
-              </button>
+              <StatusBadge status={order.status || 'PENDING'} />
             </div>
           </div>
 
@@ -309,20 +255,14 @@ const OrderDetails = () => {
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
               <span className="text-base sm:text-lg font-medium text-gray-900">Total Amount</span>
               <span className="text-xl sm:text-2xl font-bold text-primary-600">
-                {formatAmount(order.totalAmount || order.orderAmount || 0)}
+                {formatAmount(order.orderAmount)}
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Status Update Modal */}
-      <StatusUpdateModal
-        isOpen={showStatusModal}
-        onClose={() => setShowStatusModal(false)}
-        order={order}
-        onUpdate={handleStatusUpdateComplete}
-      />
+
     </div>
   )
 }

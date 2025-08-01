@@ -8,8 +8,8 @@ const router = express.Router();
 
 // @route   GET /api/analytics/dashboard
 // @desc    Get dashboard analytics
-// @access  Public
-router.get('/dashboard', async (req, res) => {
+// @access  Private (Admin/Manager)
+router.get('/dashboard', auth, authorize('ADMIN', 'MANAGER'), async (req, res) => {
   try {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -34,19 +34,12 @@ router.get('/dashboard', async (req, res) => {
       orderDate: { $gte: startOfDay }
     });
 
-    // Total revenue (paid orders only)
+    // Total revenue
     const revenueResult = await Order.aggregate([
       { $match: { paymentStatus: 'PAID' } },
       { $group: { _id: null, total: { $sum: '$totalAmount' } } }
     ]);
     const totalRevenue = revenueResult[0]?.total || 0;
-
-    // Total order value (excluding cancelled orders)
-    const totalOrderValueResult = await Order.aggregate([
-      { $match: { status: { $ne: 'CANCELLED' } } },
-      { $group: { _id: null, total: { $sum: '$totalAmount' } } }
-    ]);
-    const totalOrderValue = totalOrderValueResult[0]?.total || 0;
 
     // Revenue this month
     const revenueThisMonthResult = await Order.aggregate([
@@ -98,9 +91,8 @@ router.get('/dashboard', async (req, res) => {
       { $limit: 5 }
     ]);
 
-    // Average order value (excluding cancelled orders)
+    // Average order value
     const avgOrderValueResult = await Order.aggregate([
-      { $match: { status: { $ne: 'CANCELLED' } } },
       { $group: { _id: null, avgValue: { $avg: '$totalAmount' } } }
     ]);
     const avgOrderValue = avgOrderValueResult[0]?.avgValue || 0;
@@ -123,7 +115,6 @@ router.get('/dashboard', async (req, res) => {
           ordersThisWeek,
           ordersToday,
           totalRevenue,
-          totalOrderValue,
           revenueThisMonth,
           avgOrderValue,
           totalCustomers,
@@ -150,8 +141,8 @@ router.get('/dashboard', async (req, res) => {
 
 // @route   GET /api/analytics/sales-chart
 // @desc    Get sales chart data
-// @access  Public (Demo Mode)
-router.get('/sales-chart', async (req, res) => {
+// @access  Private (Admin/Manager)
+router.get('/sales-chart', auth, authorize('ADMIN', 'MANAGER'), async (req, res) => {
   try {
     const { period = 'month', year = new Date().getFullYear() } = req.query;
 
@@ -191,8 +182,8 @@ router.get('/sales-chart', async (req, res) => {
     const salesData = await Order.aggregate([
       {
         $match: {
-          // Exclude cancelled orders from sales chart
-          status: { $ne: 'CANCELLED' }
+          orderDate: { $gte: startDate, $lt: endDate },
+          paymentStatus: 'PAID'
         }
       },
       {

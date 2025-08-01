@@ -15,32 +15,16 @@ const api = axios.create({
   },
 })
 
-// MERN Stack environment configuration
-// API Base URL: API_BASE_URL
-// Backend: Node.js Express Server
-// Database: MongoDB Atlas
+// Log MERN Stack environment info for debugging
+console.log('🌍 MERN Stack Environment Info:')
+console.log('API Base URL:', API_BASE_URL)
+console.log('Backend:', 'Node.js Express Server')
+console.log('Database:', 'MongoDB Atlas')
+console.log('App Name:', APP_NAME)
+console.log('App Version:', APP_VERSION)
+console.log('Node Environment:', import.meta.env.NODE_ENV)
 
-// Authentication API functions
-export const authAPI = {
-  register: async (userData) => {
-    const response = await api.post('/api/auth/register', userData)
-    return response.data
-  },
-
-  login: async (credentials) => {
-    const response = await api.post('/api/auth/login', credentials)
-    return response.data
-  },
-
-  getCurrentUser: async () => {
-    const response = await api.get('/api/auth/me')
-    return response.data
-  },
-
-  logout: () => {
-    localStorage.removeItem('token')
-  }
-}
+// Simple API without authentication
 
 // Order API functions
 export const orderAPI = {
@@ -51,7 +35,7 @@ export const orderAPI = {
     formData.append('orderAmount', orderData.orderAmount)
     formData.append('invoiceFile', orderData.invoiceFile)
 
-    const response = await api.post('/api/orders', formData, {
+    const response = await axios.post(`${API_BASE_URL}/orders`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -61,31 +45,31 @@ export const orderAPI = {
 
   // Get all orders
   getAllOrders: async () => {
-    const response = await api.get('/api/orders')
+    const response = await api.get('/orders')
     return response.data
   },
 
   // Get order by ID
   getOrderById: async (id) => {
-    const response = await api.get(`/api/orders/${id}`)
+    const response = await api.get(`/orders/${id}`)
     return response.data
   },
 
   // Search orders
   searchOrders: async (params) => {
-    const response = await api.get('/api/orders/search', { params })
+    const response = await api.get('/orders/search', { params })
     return response.data
   },
 
   // Delete order
   deleteOrder: async (id) => {
-    const response = await api.delete(`/api/orders/${id}`)
+    const response = await api.delete(`/orders/${id}`)
     return response.data
   },
 
   // Update order status
   updateOrderStatus: async (id, status) => {
-    const response = await api.put(`/api/orders/${id}/status`, { status })
+    const response = await api.put(`/orders/${id}/status`, { status })
     return response.data
   },
 }
@@ -96,13 +80,13 @@ export const orderAPI = {
 export const analyticsAPI = {
   // Get dashboard analytics
   getDashboardAnalytics: async () => {
-    const response = await api.get('/api/analytics/dashboard')
+    const response = await api.get('/analytics/dashboard')
     return response.data
   },
 
   // Get sales chart data
   getSalesChartData: async () => {
-    const response = await api.get('/api/analytics/sales-chart')
+    const response = await api.get('/analytics/sales-chart')
     return response.data
   },
 }

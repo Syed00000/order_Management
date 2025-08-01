@@ -2,11 +2,11 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { orderAPI } from '../services/api'
-import {
-  DocumentArrowUpIcon,
-  UserIcon,
+import { 
+  DocumentArrowUpIcon, 
+  UserIcon, 
   CurrencyDollarIcon,
-  CheckCircleIcon
+  CheckCircleIcon 
 } from '@heroicons/react/24/outline'
 
 const CreateOrder = () => {
@@ -14,8 +14,6 @@ const CreateOrder = () => {
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     customerName: '',
-    customerEmail: '',
-    customerPhone: '',
     orderAmount: '',
     invoiceFile: null
   })
@@ -97,51 +95,19 @@ const CreateOrder = () => {
     const loadingToast = toast.loading('Creating order...')
 
     try {
-      console.log('🔄 Creating order with form data:', formData)
-
-      // Create a simple order with the form data
       const orderData = {
-        customerName: formData.customerName.trim() || 'Demo Customer',
-        customerEmail: formData.customerEmail.trim() || 'demo@example.com',
-        customerPhone: formData.customerPhone.trim() || '123-456-7890',
-        items: [{
-          productName: 'Demo Product',
-          productId: `PROD-${Date.now()}`,
-          quantity: 1,
-          unitPrice: parseFloat(formData.orderAmount) || 99.99
-        }],
-        shippingAddress: {
-          street: '123 Demo St',
-          city: 'Demo City',
-          state: 'DC',
-          zipCode: '12345',
-          country: 'USA'
-        },
-        priority: 'MEDIUM',
-        paymentMethod: 'CREDIT_CARD',
-        notes: `Order created from frontend - Customer: ${formData.customerName}`
+        customerName: formData.customerName.trim(),
+        orderAmount: parseFloat(formData.orderAmount),
+        invoiceFile: formData.invoiceFile
       }
 
-      console.log('📦 Creating order with form data:', orderData)
-
-      const response = await fetch('http://localhost:8080/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData)
-      })
-
-      const result = await response.json()
-      console.log('📋 Order creation response:', result)
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to create order')
-      }
+      const response = await orderAPI.createOrder(orderData)
       
       toast.dismiss(loadingToast)
       toast.success('Order created successfully!')
       
-      // Navigate back to dashboard
-      navigate('/dashboard')
+      // Navigate to the created order details
+      navigate(`/orders/${response.orderId}`)
       
     } catch (error) {
       toast.dismiss(loadingToast)
@@ -190,46 +156,6 @@ const CreateOrder = () => {
                 value={formData.customerName}
                 onChange={handleInputChange}
                 placeholder="Enter customer name"
-                className="input-field pl-9 sm:pl-10 text-sm sm:text-base"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Customer Email */}
-          <div>
-            <label htmlFor="customerEmail" className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-              Customer Email *
-            </label>
-            <div className="relative">
-              <UserIcon className="h-4 w-4 sm:h-5 sm:w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="email"
-                id="customerEmail"
-                name="customerEmail"
-                value={formData.customerEmail}
-                onChange={handleInputChange}
-                placeholder="Enter customer email"
-                className="input-field pl-9 sm:pl-10 text-sm sm:text-base"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Customer Phone */}
-          <div>
-            <label htmlFor="customerPhone" className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-              Customer Phone *
-            </label>
-            <div className="relative">
-              <UserIcon className="h-4 w-4 sm:h-5 sm:w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              <input
-                type="tel"
-                id="customerPhone"
-                name="customerPhone"
-                value={formData.customerPhone}
-                onChange={handleInputChange}
-                placeholder="Enter customer phone"
                 className="input-field pl-9 sm:pl-10 text-sm sm:text-base"
                 required
               />

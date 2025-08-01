@@ -80,8 +80,6 @@ const updateOrderSchema = Joi.object({
   status: Joi.string().valid('PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED').optional(),
   priority: Joi.string().valid('LOW', 'MEDIUM', 'HIGH', 'URGENT').optional(),
   paymentStatus: Joi.string().valid('PENDING', 'PAID', 'FAILED', 'REFUNDED').optional(),
-  paymentMethod: Joi.string().valid('CREDIT_CARD', 'DEBIT_CARD', 'PAYPAL', 'BANK_TRANSFER', 'CASH_ON_DELIVERY').optional(),
-  totalAmount: Joi.number().min(0).optional(),
   trackingNumber: Joi.string().optional(),
   expectedDeliveryDate: Joi.date().optional(),
   actualDeliveryDate: Joi.date().optional(),
@@ -91,8 +89,8 @@ const updateOrderSchema = Joi.object({
 
 // @route   GET /api/orders
 // @desc    Get all orders with pagination and filtering
-// @access  Public
-router.get('/', async (req, res) => {
+// @access  Private
+router.get('/', auth, async (req, res) => {
   try {
     const {
       page = 1,
@@ -112,7 +110,10 @@ router.get('/', async (req, res) => {
     if (customerEmail) filter.customerEmail = new RegExp(customerEmail, 'i');
     if (orderNumber) filter.orderNumber = new RegExp(orderNumber, 'i');
 
-    // Demo mode - show all orders (no user filtering)
+    // If user is not admin/manager, only show their orders
+    if (req.user.role === 'USER') {
+      filter.customerEmail = req.user.email;
+    }
 
     // Build sort object
     const sort = {};
@@ -154,8 +155,8 @@ router.get('/', async (req, res) => {
 
 // @route   GET /api/orders/:id
 // @desc    Get single order by ID
-// @access  Public
-router.get('/:id', async (req, res) => {
+// @access  Private
+router.get('/:id', auth, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate('customerId', 'name email phone address')
@@ -169,7 +170,13 @@ router.get('/:id', async (req, res) => {
       });
     }
 
-    // Demo mode - allow access to all orders
+    // Check if user can access this order
+    if (req.user.role === 'USER' && order.customerEmail !== req.user.email) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      });
+    }
 
     res.json({
       success: true,
@@ -187,8 +194,8 @@ router.get('/:id', async (req, res) => {
 
 // @route   POST /api/orders
 // @desc    Create new order
-// @access  Public
-router.post('/', upload.array('attachments', 5), async (req, res) => {
+// @access  Private
+router.post('/', auth, upload.array('attachments', 5), async (req, res) => {
   try {
     // Validate input
     const { error, value } = createOrderSchema.validate(req.body);
@@ -205,9 +212,6 @@ router.post('/', upload.array('attachments', 5), async (req, res) => {
       ...item,
       totalPrice: item.quantity * item.unitPrice
     }));
-
-    // Calculate total amount
-    const totalAmount = items.reduce((total, item) => total + item.totalPrice, 0);
 
     // Find or create customer
     let customer = await User.findOne({ email: value.customerEmail });
@@ -231,20 +235,15 @@ router.post('/', upload.array('attachments', 5), async (req, res) => {
       size: file.size
     })) : [];
 
-    // Generate order number
-    const orderNumber = `ORD-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
-
     // Create order
     const order = new Order({
       ...value,
-      orderNumber,
       customerId: customer._id,
       items,
-      totalAmount,
       attachments,
       statusHistory: [{
         status: 'PENDING',
-        changedBy: null, // Demo mode - no user tracking
+        changedBy: req.user.userId,
         notes: 'Order created'
       }]
     });
@@ -262,38 +261,17 @@ router.post('/', upload.array('attachments', 5), async (req, res) => {
 
   } catch (error) {
     console.error('Create order error:', error);
-    console.error('Error details:', error.message);
-    console.error('Error stack:', error.stack);
-
-    // Handle specific validation errors
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Validation error',
-        errors: Object.values(error.errors).map(err => err.message)
-      });
-    }
-
-    // Handle duplicate key errors
-    if (error.code === 11000) {
-      return res.status(400).json({
-        success: false,
-        message: 'Duplicate order number. Please try again.'
-      });
-    }
-
     res.status(500).json({
       success: false,
-      message: 'Server error while creating order',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      message: 'Server error while creating order'
     });
   }
 });
 
 // @route   PUT /api/orders/:id
 // @desc    Update order
-// @access  Public (Demo Mode)
-router.put('/:id', async (req, res) => {
+// @access  Private (Admin/Manager only)
+router.put('/:id', auth, authorize('ADMIN', 'MANAGER'), async (req, res) => {
   try {
     // Validate input
     const { error, value } = updateOrderSchema.validate(req.body);
@@ -317,7 +295,7 @@ router.put('/:id', async (req, res) => {
     if (value.status && value.status !== order.status) {
       order.statusHistory.push({
         status: value.status,
-        changedBy: null, // Demo mode - no user tracking
+        changedBy: req.user.userId,
         notes: `Status changed from ${order.status} to ${value.status}`
       });
     }
@@ -345,56 +323,10 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-// @route   PUT /api/orders/:id/status
-// @desc    Update order status
-// @access  Public (Demo Mode)
-router.put('/:id/status', async (req, res) => {
-  try {
-    const { status } = req.body;
-    console.log('Status update request:', { orderId: req.params.id, status });
-
-    // Validate status
-    const validStatuses = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid status'
-      });
-    }
-
-    // Update status directly without validation
-    const updatedOrder = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status: status },
-      { new: true, runValidators: false }
-    );
-
-    if (!updatedOrder) {
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found'
-      });
-    }
-
-    res.json({
-      success: true,
-      message: 'Order status updated successfully',
-      data: { _id: updatedOrder._id, status: updatedOrder.status }
-    });
-  } catch (error) {
-    console.error('Error updating order status:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error',
-      error: error.message
-    });
-  }
-});
-
 // @route   DELETE /api/orders/:id
 // @desc    Delete order
-// @access  Public (Demo Mode)
-router.delete('/:id', async (req, res) => {
+// @access  Private (Admin only)
+router.delete('/:id', auth, authorize('ADMIN'), async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) {
@@ -432,8 +364,8 @@ router.delete('/:id', async (req, res) => {
 
 // @route   GET /api/orders/status/:status
 // @desc    Get orders by status
-// @access  Public (Demo Mode)
-router.get('/status/:status', async (req, res) => {
+// @access  Private
+router.get('/status/:status', auth, async (req, res) => {
   try {
     const { status } = req.params;
     const validStatuses = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
@@ -446,7 +378,9 @@ router.get('/status/:status', async (req, res) => {
     }
 
     const filter = { status };
-    // Demo mode - show all orders regardless of user
+    if (req.user.role === 'USER') {
+      filter.customerEmail = req.user.email;
+    }
 
     const orders = await Order.find(filter)
       .populate('customerId', 'name email phone')
@@ -463,213 +397,6 @@ router.get('/status/:status', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Server error while fetching orders'
-    });
-  }
-});
-
-// @route   POST /api/orders/demo-chart-data
-// @desc    Create demo data with different dates for charts
-// @access  Public (Demo Mode)
-router.post('/demo-chart-data', async (req, res) => {
-  try {
-    // Create orders with different dates for better chart visualization
-    const chartDemoOrders = [
-      {
-        customerName: 'July Customer',
-        customerEmail: 'july@example.com',
-        customerPhone: '555-0001',
-        items: [{ productName: 'July Product', productId: 'JULY-001', quantity: 2, unitPrice: 150.00, totalPrice: 300.00 }],
-        shippingAddress: { street: '123 July St', city: 'July City', state: 'JL', zipCode: '12345', country: 'USA' },
-        priority: 'HIGH',
-        paymentMethod: 'CREDIT_CARD',
-        paymentStatus: 'PAID',
-        status: 'DELIVERED',
-        totalAmount: 300.00,
-        orderDate: new Date('2025-07-28T10:00:00.000Z'),
-        notes: 'July chart demo order'
-      },
-      {
-        customerName: 'July End Customer',
-        customerEmail: 'julyend@example.com',
-        customerPhone: '555-0002',
-        items: [{ productName: 'July End Product', productId: 'JULY-002', quantity: 1, unitPrice: 250.00, totalPrice: 250.00 }],
-        shippingAddress: { street: '456 July Ave', city: 'July City', state: 'JL', zipCode: '12345', country: 'USA' },
-        priority: 'MEDIUM',
-        paymentMethod: 'CREDIT_CARD',
-        paymentStatus: 'PAID',
-        status: 'SHIPPED',
-        totalAmount: 250.00,
-        orderDate: new Date('2025-07-30T14:00:00.000Z'),
-        notes: 'July end chart demo order'
-      }
-    ];
-
-    const createdOrders = [];
-    for (const orderData of chartDemoOrders) {
-      // Generate order number
-      const orderNumber = `CHART-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-
-      // Find or create customer
-      let customer = await User.findOne({ email: orderData.customerEmail });
-      if (!customer) {
-        customer = new User({
-          name: orderData.customerName,
-          email: orderData.customerEmail,
-          password: 'demo123',
-          role: 'USER'
-        });
-        await customer.save();
-      }
-
-      const order = new Order({
-        ...orderData,
-        orderNumber,
-        customerId: customer._id,
-        statusHistory: [{
-          status: orderData.status,
-          changedBy: null,
-          notes: 'Chart demo order created'
-        }]
-      });
-
-      await order.save();
-      createdOrders.push(order);
-    }
-
-    res.json({
-      success: true,
-      message: `Created ${createdOrders.length} chart demo orders with different dates`,
-      data: { orders: createdOrders }
-    });
-
-  } catch (error) {
-    console.error('Create chart demo data error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create chart demo data'
-    });
-  }
-});
-
-// @route   POST /api/orders/demo-data
-// @desc    Create demo data for analytics
-// @access  Public (Demo Mode)
-router.post('/demo-data', async (req, res) => {
-  try {
-    // Create sample orders with proper data
-    const demoOrders = [
-      {
-        orderNumber: 'ORD-2025-001',
-        customerName: 'John Doe',
-        customerEmail: 'john@example.com',
-        customerPhone: '123-456-7890',
-        totalAmount: 299.99,
-        paymentMethod: 'CREDIT_CARD',
-        paymentStatus: 'PAID',
-        status: 'DELIVERED',
-        priority: 'HIGH',
-        orderDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
-        items: [{
-          productName: 'Laptop',
-          productId: 'PROD-001',
-          quantity: 1,
-          unitPrice: 299.99,
-          totalPrice: 299.99
-        }],
-        shippingAddress: {
-          street: '123 Main St',
-          city: 'New York',
-          state: 'NY',
-          zipCode: '10001',
-          country: 'USA'
-        }
-      },
-      {
-        orderNumber: 'ORD-2025-002',
-        customerName: 'Jane Smith',
-        customerEmail: 'jane@example.com',
-        customerPhone: '987-654-3210',
-        totalAmount: 149.99,
-        paymentMethod: 'PAYPAL',
-        paymentStatus: 'PAID',
-        status: 'SHIPPED',
-        priority: 'MEDIUM',
-        orderDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-        items: [{
-          productName: 'Headphones',
-          productId: 'PROD-002',
-          quantity: 1,
-          unitPrice: 149.99,
-          totalPrice: 149.99
-        }],
-        shippingAddress: {
-          street: '456 Oak Ave',
-          city: 'Los Angeles',
-          state: 'CA',
-          zipCode: '90210',
-          country: 'USA'
-        }
-      },
-      {
-        orderNumber: 'ORD-2025-003',
-        customerName: 'Bob Johnson',
-        customerEmail: 'bob@example.com',
-        customerPhone: '555-123-4567',
-        totalAmount: 89.99,
-        paymentMethod: 'CREDIT_CARD',
-        paymentStatus: 'PAID',
-        status: 'PROCESSING',
-        priority: 'LOW',
-        orderDate: new Date(), // Today
-        items: [{
-          productName: 'Mouse',
-          productId: 'PROD-003',
-          quantity: 1,
-          unitPrice: 89.99,
-          totalPrice: 89.99
-        }],
-        shippingAddress: {
-          street: '789 Pine St',
-          city: 'Chicago',
-          state: 'IL',
-          zipCode: '60601',
-          country: 'USA'
-        }
-      }
-    ];
-
-    // First create a demo customer
-    const demoCustomer = await User.findOne({ email: 'demo@example.com' }) ||
-      await User.create({
-        name: 'Demo Customer',
-        email: 'demo@example.com',
-        password: 'demo123',
-        role: 'USER'
-      });
-
-    // Add customerId to all orders
-    const ordersWithCustomer = demoOrders.map(order => ({
-      ...order,
-      customerId: demoCustomer._id
-    }));
-
-    // Create orders without validation
-    const createdOrders = await Order.insertMany(ordersWithCustomer, {
-      ordered: false,
-      validateBeforeInsert: false
-    });
-
-    res.json({
-      success: true,
-      message: `Created ${createdOrders.length} demo orders`,
-      data: createdOrders
-    });
-  } catch (error) {
-    console.error('Error creating demo data:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error creating demo data',
-      error: error.message
     });
   }
 });
