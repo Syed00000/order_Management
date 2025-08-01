@@ -50,15 +50,28 @@ const Dashboard = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true)
-      const response = await orderAPI.getAllOrders()
+      console.log('🔄 Fetching orders...')
 
-      // Extract orders from API response structure
-      const orders = response.data?.orders || []
-      setOrders(orders)
-      setFilteredOrders(orders)
+      const response = await fetch('http://localhost:8080/api/orders')
+      const data = await response.json()
+
+      console.log('📦 Orders API Response:', data)
+
+      if (data.success && data.data && data.data.orders) {
+        const orders = data.data.orders
+        console.log('✅ Orders loaded:', orders.length)
+        setOrders(orders)
+        setFilteredOrders(orders)
+      } else {
+        console.error('❌ Invalid orders response:', data)
+        setOrders([])
+        setFilteredOrders([])
+      }
     } catch (error) {
-      console.error('Error fetching orders:', error)
+      console.error('❌ Error fetching orders:', error)
       toast.error('Failed to fetch orders')
+      setOrders([])
+      setFilteredOrders([])
     } finally {
       setLoading(false)
     }
@@ -66,21 +79,38 @@ const Dashboard = () => {
 
   const fetchAnalytics = async () => {
     try {
+      console.log('🔄 Fetching analytics...')
+
       const [analyticsResponse, chartResponse] = await Promise.all([
-        analyticsAPI.getDashboardAnalytics(),
-        analyticsAPI.getSalesChartData()
+        fetch('http://localhost:8080/api/analytics/dashboard'),
+        fetch('http://localhost:8080/api/analytics/sales-chart')
       ])
 
-      // Extract data from API response structure
-      console.log('📊 Analytics Response:', analyticsResponse)
-      console.log('📈 Chart Response:', chartResponse)
-      console.log('📊 Analytics Data:', JSON.stringify(analyticsResponse.data, null, 2))
-      console.log('📈 Chart Data:', JSON.stringify(chartResponse.data, null, 2))
-      setAnalytics(analyticsResponse.data || null)
-      setChartData(chartResponse.data || null)
+      const analyticsData = await analyticsResponse.json()
+      const chartData = await chartResponse.json()
+
+      console.log('📊 Analytics Response:', analyticsData)
+      console.log('📈 Chart Response:', chartData)
+
+      if (analyticsData.success && analyticsData.data) {
+        console.log('✅ Analytics loaded:', analyticsData.data)
+        setAnalytics(analyticsData.data)
+      } else {
+        console.error('❌ Invalid analytics response:', analyticsData)
+        setAnalytics(null)
+      }
+
+      if (chartData.success && chartData.data) {
+        console.log('✅ Chart data loaded:', chartData.data)
+        setChartData(chartData.data)
+      } else {
+        console.error('❌ Invalid chart response:', chartData)
+        setChartData(null)
+      }
     } catch (error) {
-      console.error('Error fetching analytics:', error)
-      // Don't show error toast for analytics as it's not critical
+      console.error('❌ Error fetching analytics:', error)
+      setAnalytics(null)
+      setChartData(null)
     }
   }
 
@@ -262,58 +292,54 @@ const Dashboard = () => {
           <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Sales</h3>
             {chartData && chartData.chartData && chartData.chartData.length > 0 ? (
-              <>
-                {console.log('📊 Rendering Sales Chart with data:', chartData.chartData)}
-                <SalesChart
-                  data={{
-                    labels: chartData.chartData.map(item => item.date),
-                    datasets: [{
-                      label: 'Sales ($)',
-                      data: chartData.chartData.map(item => item.sales),
-                      backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                      borderColor: 'rgb(59, 130, 246)',
-                      borderWidth: 1,
-                    }]
-                  }}
-                  type="bar"
-                />
-              </>
+              <SalesChart
+                data={{
+                  labels: chartData.chartData.map(item => item.date),
+                  datasets: [{
+                    label: 'Sales ($)',
+                    data: chartData.chartData.map(item => item.sales),
+                    backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 1,
+                  }]
+                }}
+                type="bar"
+              />
             ) : (
-              <>
-                {console.log('❌ No sales chart data:', chartData)}
-                <p className="text-gray-500 text-center py-8">No sales data available</p>
-              </>
+              <div className="text-center py-8">
+                <p className="text-gray-500">No sales data available</p>
+                <p className="text-xs text-gray-400 mt-2">Chart Data: {chartData ? 'EXISTS' : 'NULL'}</p>
+                {chartData && <p className="text-xs text-gray-400">Items: {chartData.chartData?.length || 0}</p>}
+              </div>
             )}
           </div>
 
           <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Status Distribution</h3>
             {analytics && analytics.statusDistribution && Object.keys(analytics.statusDistribution).length > 0 ? (
-              <>
-                {console.log('📊 Rendering Status Chart with data:', analytics.statusDistribution)}
-                <SalesChart
-                  data={{
-                    labels: Object.keys(analytics.statusDistribution),
-                    datasets: [{
-                      data: Object.values(analytics.statusDistribution).map(status => status.count),
-                      backgroundColor: [
-                        'rgba(255, 99, 132, 0.8)',
-                        'rgba(54, 162, 235, 0.8)',
-                        'rgba(255, 205, 86, 0.8)',
-                        'rgba(75, 192, 192, 0.8)',
-                        'rgba(153, 102, 255, 0.8)',
-                      ],
-                      borderWidth: 1,
-                    }]
-                  }}
-                  type="doughnut"
-                />
-              </>
+              <SalesChart
+                data={{
+                  labels: Object.keys(analytics.statusDistribution),
+                  datasets: [{
+                    data: Object.values(analytics.statusDistribution).map(status => status.count),
+                    backgroundColor: [
+                      'rgba(255, 99, 132, 0.8)',
+                      'rgba(54, 162, 235, 0.8)',
+                      'rgba(255, 205, 86, 0.8)',
+                      'rgba(75, 192, 192, 0.8)',
+                      'rgba(153, 102, 255, 0.8)',
+                    ],
+                    borderWidth: 1,
+                  }]
+                }}
+                type="doughnut"
+              />
             ) : (
-              <>
-                {console.log('❌ No status distribution data:', analytics)}
-                <p className="text-gray-500 text-center py-8">No status data available</p>
-              </>
+              <div className="text-center py-8">
+                <p className="text-gray-500">No status data available</p>
+                <p className="text-xs text-gray-400 mt-2">Analytics: {analytics ? 'EXISTS' : 'NULL'}</p>
+                {analytics && <p className="text-xs text-gray-400">Status Dist: {analytics.statusDistribution ? 'EXISTS' : 'NULL'}</p>}
+              </div>
             )}
           </div>
         </div>

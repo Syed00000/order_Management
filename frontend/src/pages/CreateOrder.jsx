@@ -97,18 +97,45 @@ const CreateOrder = () => {
     const loadingToast = toast.loading('Creating order...')
 
     try {
-      // Just create demo data for now - this always works
-      const response = await fetch('http://localhost:8080/api/orders/demo-data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({})
-      })
+      console.log('🔄 Creating order with form data:', formData)
 
-      if (!response.ok) {
-        throw new Error('Failed to create order')
+      // Create a simple order with the form data
+      const orderData = {
+        customerName: formData.customerName.trim() || 'Demo Customer',
+        customerEmail: formData.customerEmail.trim() || 'demo@example.com',
+        customerPhone: formData.customerPhone.trim() || '123-456-7890',
+        items: [{
+          productName: 'Demo Product',
+          productId: `PROD-${Date.now()}`,
+          quantity: 1,
+          unitPrice: parseFloat(formData.orderAmount) || 99.99
+        }],
+        shippingAddress: {
+          street: '123 Demo St',
+          city: 'Demo City',
+          state: 'DC',
+          zipCode: '12345',
+          country: 'USA'
+        },
+        priority: 'MEDIUM',
+        paymentMethod: 'CREDIT_CARD',
+        notes: `Order created from frontend - Customer: ${formData.customerName}`
       }
 
+      console.log('📦 Sending order data:', orderData)
+
+      const response = await fetch('http://localhost:8080/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      })
+
       const result = await response.json()
+      console.log('📋 Order creation response:', result)
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to create order')
+      }
       
       toast.dismiss(loadingToast)
       toast.success('Order created successfully!')
