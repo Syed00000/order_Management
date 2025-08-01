@@ -74,8 +74,8 @@ const Dashboard = () => {
       // Extract data from API response structure
       console.log('📊 Analytics Response:', analyticsResponse)
       console.log('📈 Chart Response:', chartResponse)
-      console.log('📊 Analytics Data:', analyticsResponse.data)
-      console.log('📈 Chart Data:', chartResponse.data)
+      console.log('📊 Analytics Data:', JSON.stringify(analyticsResponse.data, null, 2))
+      console.log('📈 Chart Data:', JSON.stringify(chartResponse.data, null, 2))
       setAnalytics(analyticsResponse.data || null)
       setChartData(chartResponse.data || null)
     } catch (error) {
@@ -255,7 +255,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Sales</h3>
-            {chartData.chartData && chartData.chartData.length > 0 ? (
+            {chartData && chartData.chartData && chartData.chartData.length > 0 ? (
               <>
                 {console.log('📊 Rendering Sales Chart with data:', chartData.chartData)}
                 <SalesChart
@@ -282,7 +282,7 @@ const Dashboard = () => {
 
           <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Status Distribution</h3>
-            {analytics.statusDistribution ? (
+            {analytics && analytics.statusDistribution && Object.keys(analytics.statusDistribution).length > 0 ? (
               <>
                 {console.log('📊 Rendering Status Chart with data:', analytics.statusDistribution)}
                 <SalesChart
