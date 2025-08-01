@@ -30,11 +30,23 @@ const OrderDetails = () => {
     try {
       setLoading(true)
       setError(null)
-      const data = await orderAPI.getOrderById(id)
+      console.log('🔄 Fetching order details for ID:', id)
 
-      setOrder(data)
+      const response = await fetch(`http://localhost:8080/api/orders/${id}`)
+      const data = await response.json()
+
+      console.log('📦 Order details response:', data)
+
+      if (data.success && data.data) {
+        console.log('✅ Order loaded:', data.data)
+        setOrder(data.data)
+      } else {
+        console.error('❌ Invalid order response:', data)
+        setError('Order not found')
+        toast.error('Order not found')
+      }
     } catch (error) {
-      console.error('Error fetching order details:', error)
+      console.error('❌ Error fetching order details:', error)
       setError('Order not found or failed to load')
       toast.error('Failed to load order details')
     } finally {
@@ -186,7 +198,7 @@ const OrderDetails = () => {
               <div className="min-w-0 flex-1">
                 <p className="text-xs sm:text-sm text-gray-500">Order Amount</p>
                 <p className="font-medium text-gray-900 text-base sm:text-lg">
-                  {formatAmount(order.orderAmount)}
+                  {formatAmount(order.totalAmount || order.orderAmount || 0)}
                 </p>
               </div>
             </div>
@@ -255,7 +267,7 @@ const OrderDetails = () => {
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
               <span className="text-base sm:text-lg font-medium text-gray-900">Total Amount</span>
               <span className="text-xl sm:text-2xl font-bold text-primary-600">
-                {formatAmount(order.orderAmount)}
+                {formatAmount(order.totalAmount || order.orderAmount || 0)}
               </span>
             </div>
           </div>

@@ -228,9 +228,13 @@ router.post('/', upload.array('attachments', 5), async (req, res) => {
       size: file.size
     })) : [];
 
+    // Generate order number
+    const orderNumber = `ORD-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+
     // Create order
     const order = new Order({
       ...value,
+      orderNumber,
       customerId: customer._id,
       items,
       attachments,

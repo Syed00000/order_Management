@@ -316,12 +316,12 @@ const Dashboard = () => {
 
           <div className="card">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Status Distribution</h3>
-            {analytics && analytics.statusDistribution && Object.keys(analytics.statusDistribution).length > 0 ? (
+            {analytics && analytics.distributions && analytics.distributions.status && analytics.distributions.status.length > 0 ? (
               <SalesChart
                 data={{
-                  labels: Object.keys(analytics.statusDistribution),
+                  labels: analytics.distributions.status.map(item => item._id),
                   datasets: [{
-                    data: Object.values(analytics.statusDistribution).map(status => status.count),
+                    data: analytics.distributions.status.map(item => item.count),
                     backgroundColor: [
                       'rgba(255, 99, 132, 0.8)',
                       'rgba(54, 162, 235, 0.8)',
@@ -338,7 +338,8 @@ const Dashboard = () => {
               <div className="text-center py-8">
                 <p className="text-gray-500">No status data available</p>
                 <p className="text-xs text-gray-400 mt-2">Analytics: {analytics ? 'EXISTS' : 'NULL'}</p>
-                {analytics && <p className="text-xs text-gray-400">Status Dist: {analytics.statusDistribution ? 'EXISTS' : 'NULL'}</p>}
+                {analytics && <p className="text-xs text-gray-400">Distributions: {analytics.distributions ? 'EXISTS' : 'NULL'}</p>}
+                {analytics && analytics.distributions && <p className="text-xs text-gray-400">Status: {analytics.distributions.status ? analytics.distributions.status.length : 'NULL'}</p>}
               </div>
             )}
           </div>
